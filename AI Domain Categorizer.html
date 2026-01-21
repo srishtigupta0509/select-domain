@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Domain Categorizer Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            color: #667eea;
+            padding: 30px;
+            text-align: center;
+            flex-shrink: 0;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            padding: 0;
+            flex: 1;
+            overflow: visible;
+        }
+
+        .game-panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 3px solid #667eea;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow: visible;
+        }
+
+        .game-panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .score-display {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 2px solid #667eea;
+        }
+
+        .score-display h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .score-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .instructions {
+            background: #f0f4ff;
+            padding: 20px;
+            padding-left: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .application-card {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .application-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .application-description {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .domain-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .domain-btn {
+            padding: 10px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .domain-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .domain-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .domain-btn.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .domain-btn.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #dcfce7;
+            color: #15803d;
+            border: 2px solid #15803d;
+        }
+
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #dc2626;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(102,126,234,0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-box h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .domain-info {
+            background: #f0f4ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            color: #555;
+            margin-top: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        @media (max-width: 1024px) {
+            .domain-selector {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .domain-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Domain Categorizer</h1>
+            <p>Match AI Applications to Their Domains</p>
+        </div>
+
+        <div class="main-content">
+            <div class="game-panel">
+                <h2>Game Interface</h2>
+                
+                <div class="instructions">
+                    <h3>📋 How to Play</h3>
+                    <ol>
+                        <li>Read each AI application description carefully</li>
+                        <li>Identify which domain it belongs to</li>
+                        <li>Select from the 6 AI domains</li>
+                        <li>Get instant feedback with explanations</li>
+                        <li>Complete all 10 applications to win!</li>
+                    </ol>
+                </div>
+
+                <div class="score-display">
+                    <h3>Your Score</h3>
+                    <div class="score-number" id="scoreNumber">0</div>
+                    <div style="color: #666; font-size: 0.9em;">out of 10</div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+
+                <div id="gameArea">
+                    <div class="application-card">
+                        <h3 id="appName">Loading...</h3>
+                        <div class="application-description" id="appDescription">Loading...</div>
+                        
+                        <div class="domain-selector" id="domainSelector">
+                            <!-- Domains will be generated here -->
+                        </div>
+
+                        <div class="domain-info" id="domainInfo" style="display: none;"></div>
+                        <div class="feedback" id="feedback"></div>
+
+                        <div class="controls">
+                            <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">Submit Answer</button>
+                            <button class="btn btn-secondary" id="skipBtn" onclick="skipQuestion()">Skip</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="gameOverArea" style="display: none;">
+                    <div class="score-display">
+                        <h3>Game Complete! 🎉</h3>
+                        <div class="score-number" id="finalScore">0</div>
+                        <p style="margin-top: 15px; font-size: 1.1em;">Applications Correctly Categorized</p>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="restartGame()">Play Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <div class="modal" id="completionModal">
+        <div class="modal-content">
+            <h2>🎊 Congratulations!</h2>
+            <p>You've completed the AI Domain Categorizer Game!</p>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h4>Correct</h4>
+                    <div class="stat-number" id="modalCorrect">0</div>
+                </div>
+                <div class="stat-box">
+                    <h4>Accuracy</h4>
+                    <div class="stat-number" id="modalAccuracy">0%</div>
+                </div>
+                <div class="stat-box">
+                    <h4>AI Expert Level</h4>
+                    <div class="stat-number" id="modalMastery">🌟</div>
+                </div>
+            </div>
+            <p style="margin-top: 20px; font-size: 1em;">You now understand AI applications and their domains!</p>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // AI Domains
+        const aiDomains = [
+            { name: "Computer Vision", color: "#FF6B6B" },
+            { name: "Natural Language Processing", color: "#4ECDC4" },
+            { name: "Robotics", color: "#45B7D1" },
+            { name: "Machine Learning", color: "#FFA07A" },
+            { name: "Recommendation Systems", color: "#98D8C8" },
+            { name: "Speech Recognition", color: "#F7DC6F" }
+        ];
+
+        // Question Bank - 20 diverse AI applications
+        const questionBank = [
+            {
+                name: "ChatGPT",
+                description: "An AI system that understands and generates human language, capable of answering questions, writing content, and having conversations.",
+                domain: 1,
+                domainInfo: "Processes and generates text using deep learning models trained on large language datasets."
+            },
+            {
+                name: "Tesla Autopilot",
+                description: "An autonomous driving system that uses cameras and sensors to detect objects, lanes, and traffic signs to navigate vehicles safely.",
+                domain: 0,
+                domainInfo: "Uses image recognition to understand road scenes and make driving decisions in real-time."
+            },
+            {
+                name: "Netflix Recommendations",
+                description: "A personalized content suggestion system that analyzes your viewing history and preferences to recommend movies and shows.",
+                domain: 4,
+                domainInfo: "Predicts user preferences based on past behavior and similar users to suggest relevant content."
+            },
+            {
+                name: "Google Translate",
+                description: "A machine translation service that converts text from one language to another using neural networks trained on parallel corpora.",
+                domain: 1,
+                domainInfo: "Understands context and meaning to translate between languages accurately."
+            },
+            {
+                name: "Boston Dynamics' Atlas Robot",
+                description: "A humanoid robot capable of walking, climbing, and performing complex tasks in challenging environments.",
+                domain: 2,
+                domainInfo: "Combines computer vision, sensors, and actuators for autonomous movement and task execution."
+            },
+            {
+                name: "Apple Siri",
+                description: "A voice assistant that converts spoken words into text and responds with spoken or text-based answers to user queries.",
+                domain: 3,
+                domainInfo: "Uses multiple AI techniques including speech processing and language understanding."
+            },
+            {
+                name: "Facebook Facial Recognition",
+                description: "A system that identifies and tags people in photos by detecting facial features and comparing them against a database.",
+                domain: 0,
+                domainInfo: "Uses deep neural networks to extract facial features and match them for identity recognition."
+            },
+            {
+                name: "Spotify Song Recommendations",
+                description: "An algorithm that suggests songs based on your listening history, liked songs, and similar user preferences.",
+                domain: 4,
+                domainInfo: "Uses collaborative filtering to match users with similar tastes and recommend new music."
+            },
+            {
+                name: "Medical Image Analysis",
+                description: "An AI system that analyzes X-rays, CT scans, and MRI images to detect tumors, fractures, and other abnormalities.",
+                domain: 0,
+                domainInfo: "Trained on thousands of medical images to identify patterns indicating diseases."
+            },
+            {
+                name: "Amazon Alexa",
+                description: "A smart speaker AI that listens to voice commands, recognizes intent, and executes actions like playing music or controlling smart home devices.",
+                domain: 3,
+                domainInfo: "Processes speech to understand commands and respond appropriately with voice or action."
+            },
+            {
+                name: "Grammarly Writing Assistant",
+                description: "An AI writing tool that analyzes text for grammar, spelling, style, and tone, offering real-time corrections and suggestions.",
+                domain: 1,
+                domainInfo: "Understands language patterns and grammar rules to provide writing suggestions."
+            },
+            {
+                name: "ABB Manufacturing Robot",
+                description: "An industrial robot arm used in factories to perform repetitive tasks like welding, assembly, and material handling with precision.",
+                domain: 2,
+                domainInfo: "Combines mechanical automation with sensors for precise and repeatable industrial tasks."
+            },
+            {
+                name: "Amazon Product Recommendations",
+                description: "An e-commerce recommendation engine that suggests products based on browsing history, purchases, and similar customer behavior.",
+                domain: 4,
+                domainInfo: "Analyzes user behavior patterns to predict and recommend products they're likely to buy."
+            },
+            {
+                name: "Google Photos Search",
+                description: "A photo search feature that lets users find images by describing what's in them (e.g., 'dogs', 'sunset') using visual understanding.",
+                domain: 0,
+                domainInfo: "Recognizes objects, scenes, and concepts in images for semantic search capabilities."
+            },
+            {
+                name: "Shazam Music Recognition",
+                description: "An app that identifies songs by analyzing short audio samples and matching them against a database of music fingerprints.",
+                domain: 3,
+                domainInfo: "Converts audio into unique identifiers and matches them to identify songs instantly."
+            },
+            {
+                name: "Waymo Self-Driving Car",
+                description: "A fully autonomous vehicle that perceives its environment, plans routes, and drives without human intervention using multiple AI systems.",
+                domain: 0,
+                domainInfo: "Integrates computer vision, sensor fusion, and decision-making to drive autonomously."
+            },
+            {
+                name: "LinkedIn Job Recommendations",
+                description: "A job recommendation system that matches job seekers with relevant positions based on skills, experience, and career preferences.",
+                domain: 4,
+                domainInfo: "Uses collaborative filtering and profile matching to connect candidates with suitable jobs."
+            },
+            {
+                name: "Real-time Language Translation",
+                description: "Technology that translates spoken words in real-time during conversations, breaking language barriers between people.",
+                domain: 1,
+                domainInfo: "Combines speech recognition and machine translation to provide instant communication across languages."
+            },
+            {
+                name: "Humanoid Service Robot",
+                description: "A robot designed to interact with humans in hospitality or healthcare settings, capable of navigation, object manipulation, and communication.",
+                domain: 2,
+                domainInfo: "Integrates multiple AI systems for perception, planning, and human-robot interaction."
+            },
+            {
+                name: "YouTube Video Recommendations",
+                description: "An algorithm that suggests videos based on watch history, liked videos, and channels subscribed to by similar users worldwide.",
+                domain: 4,
+                domainInfo: "Uses billions of data points to predict which videos a user is most likely to watch next."
+            }
+        ];
+
+        // Shuffle and select 10 questions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        const gameQuestions = shuffleArray(questionBank).slice(0, 10);
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedDomain = null;
+        let answered = false;
+
+        function startGame() {
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= gameQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const question = gameQuestions[currentQuestion];
+            document.getElementById('appName').textContent = question.name;
+            document.getElementById('appDescription').textContent = question.description;
+            document.getElementById('domainInfo').style.display = 'none';
+            document.getElementById('domainInfo').textContent = '';
+            
+            const domainSelector = document.getElementById('domainSelector');
+            domainSelector.innerHTML = '';
+            
+            aiDomains.forEach((domain, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'domain-btn';
+                btn.textContent = domain.name;
+                btn.style.borderColor = domain.color;
+                btn.onclick = () => selectDomain(index);
+                domainSelector.appendChild(btn);
+            });
+
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').textContent = '';
+            selectedDomain = null;
+            answered = false;
+            updateProgress();
+        }
+
+        function selectDomain(index) {
+            if (answered) return;
+            selectedDomain = index;
+            
+            const btns = document.querySelectorAll('.domain-btn');
+            btns.forEach(btn => btn.classList.remove('selected'));
+            btns[index].classList.add('selected');
+            btns[index].style.background = aiDomains[index].color;
+            btns[index].style.color = 'white';
+        }
+
+        function submitAnswer() {
+            if (selectedDomain === null) {
+                alert('Please select a domain!');
+                return;
+            }
+
+            answered = true;
+            const question = gameQuestions[currentQuestion];
+            const btns = document.querySelectorAll('.domain-btn');
+            const feedback = document.getElementById('feedback');
+            const domainInfo = document.getElementById('domainInfo');
+
+            if (selectedDomain === question.domain) {
+                score++;
+                btns[selectedDomain].classList.add('correct');
+                btns[selectedDomain].style.background = '#10b981';
+                feedback.className = 'feedback show correct';
+                feedback.innerHTML = `<strong>✓ Correct!</strong> ${question.name} is indeed in the ${aiDomains[question.domain].name} domain.`;
+                domainInfo.style.display = 'block';
+                domainInfo.textContent = question.domainInfo;
+            } else {
+                btns[selectedDomain].classList.add('incorrect');
+                btns[selectedDomain].style.background = '#ef4444';
+                btns[question.domain].classList.add('correct');
+                btns[question.domain].style.background = '#10b981';
+                btns[question.domain].style.color = 'white';
+                feedback.className = 'feedback show incorrect';
+                feedback.innerHTML = `<strong>✗ Incorrect!</strong> ${question.name} belongs to <strong>${aiDomains[question.domain].name}</strong>, not ${aiDomains[selectedDomain].name}.`;
+                domainInfo.style.display = 'block';
+                domainInfo.textContent = question.domainInfo;
+            }
+
+            document.getElementById('submitBtn').textContent = 'Next Application';
+            document.getElementById('submitBtn').onclick = nextQuestion;
+            updateProgress();
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            selectedDomain = null;
+            answered = false;
+            document.getElementById('submitBtn').textContent = 'Submit Answer';
+            document.getElementById('submitBtn').onclick = submitAnswer;
+            loadQuestion();
+        }
+
+        function skipQuestion() {
+            currentQuestion++;
+            selectedDomain = null;
+            answered = false;
+            loadQuestion();
+        }
+
+        function updateProgress() {
+            const percentage = Math.round(((currentQuestion + 1) / gameQuestions.length) * 100);
+            document.getElementById('scoreNumber').textContent = score;
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = percentage + '%';
+        }
+
+        function endGame() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('gameOverArea').style.display = 'block';
+            document.getElementById('finalScore').textContent = score;
+            
+            const accuracy = Math.round((score / gameQuestions.length) * 100);
+            document.getElementById('modalCorrect').textContent = score;
+            document.getElementById('modalAccuracy').textContent = accuracy + '%';
+            
+            let mastery = '🤖';
+            if (accuracy >= 80) mastery = '🤖🤖🤖 Expert';
+            else if (accuracy >= 60) mastery = '🤖🤖 Advanced';
+            
+            document.getElementById('modalMastery').textContent = mastery;
+            document.getElementById('completionModal').classList.add('show');
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedDomain = null;
+            answered = false;
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('gameOverArea').style.display = 'none';
+            document.getElementById('completionModal').classList.remove('show');
+            loadQuestion();
+        }
+
+        function closeModal() {
+            document.getElementById('completionModal').classList.remove('show');
+        }
+
+        // Start the game
+        startGame();
+    </script>
+</body>
+</html>
